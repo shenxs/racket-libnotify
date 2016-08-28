@@ -15,9 +15,12 @@
          notification-clear-hints
          notification-close
          notify-init
+         notify-is-initted
          notify-uninit
          notify-get-app-name
          notify-set-app-name
+         notify-get-sever-cap
+         notify-get-sever-info
          gdk-cairo-surface->pixbuf)
 
 (define-ffi-definer define-notify (ffi-lib "libnotify" '("4" "")))
@@ -26,10 +29,15 @@
 (define-ffi-definer define-gdk (ffi-lib "libgdk-3" '("0" "")))
 
 (define-gdk gdk-cairo-surface->pixbuf
-            (_fun _pointer _int _int _int _int -> _pointer)
-            #:c-id gdk_pixbuf_get_from_surface)
+  (_fun _pointer _int _int _int _int -> _pointer)
+  #:c-id gdk_pixbuf_get_from_surface)
 
 (define-cpointer-type _NotifyNotification)
+
+(define-cstruct _GList ([data _gcpointer]
+                        [next _GList-pointer/null]
+                        [prev _GList-pointer/null]))
+
 
 (define-cstruct _GError
   ([domain _int]
@@ -40,66 +48,82 @@
   (_enum '(low normal critical)))
 
 (define-notify notification-new
-               (_fun _string _string _string
-                     -> _NotifyNotification)
-               #:c-id notify_notification_new)
+  (_fun _string _string _string
+        -> _NotifyNotification)
+  #:c-id notify_notification_new)
 
 (define-notify notification-update
-               (_fun _NotifyNotification _string _string _string
-                     -> _bool)
-               #:c-id notify_notification_update)
+  (_fun _NotifyNotification _string _string _string
+        -> _bool)
+  #:c-id notify_notification_update)
 
 (define-notify notification-show
-               (_fun _NotifyNotification
-                     ;; FIXME: probably needs a finalizer, also see close
-                     (err : (_ptr i _GError-pointer/null) = #f)
-                     -> (ret : _bool)
-                     -> (values ret err))
-               #:c-id notify_notification_show)
+  (_fun _NotifyNotification
+        ;; FIXME: probably needs a finalizer, also see close
+        (err : (_ptr i _GError-pointer/null) = #f)
+        -> (ret : _bool)
+        -> (values ret err))
+  #:c-id notify_notification_show)
 
 (define-notify notification-set-app-name
-               (_fun _NotifyNotification _string -> _void)
-               #:c-id notify_notification_set_app_name)
+  (_fun _NotifyNotification _string -> _void)
+  #:c-id notify_notification_set_app_name)
 
 (define-notify notification-set-timeout
-               (_fun _NotifyNotification _int -> _void)
-               #:c-id notify_notification_set_timeout)
+  (_fun _NotifyNotification _int -> _void)
+  #:c-id notify_notification_set_timeout)
 
 (define-notify notification-set-category
-               (_fun _NotifyNotification _string -> _void)
-               #:c-id notify_notification_set_category)
+  (_fun _NotifyNotification _string -> _void)
+  #:c-id notify_notification_set_category)
 
 (define-notify notification-set-urgency
-               (_fun _NotifyNotification _NotifyUrgency -> _void)
-               #:c-id notify_notification_set_urgency)
+  (_fun _NotifyNotification _NotifyUrgency -> _void)
+  #:c-id notify_notification_set_urgency)
 
 (define-notify notification-set-image-from-pixbuf
-               (_fun _NotifyNotification _pointer -> _void)
-               #:c-id notify_notification_set_image_from_pixbuf)
+  (_fun _NotifyNotification _pointer -> _void)
+  #:c-id notify_notification_set_image_from_pixbuf)
 
 (define-notify notification-clear-hints
-               (_fun _NotifyNotification -> _void)
-               #:c-id notify_notification_clear_hints)
+  (_fun _NotifyNotification -> _void)
+  #:c-id notify_notification_clear_hints)
 
 (define-notify notification-close
-               (_fun _NotifyNotification
-                     (err : (_ptr i _GError-pointer/null) = #f)
-                     -> (ret : _bool)
-                     -> (values ret err))
-               #:c-id notify_notification_close)
+  (_fun _NotifyNotification
+        (err : (_ptr i _GError-pointer/null) = #f)
+        -> (ret : _bool)
+        -> (values ret err))
+  #:c-id notify_notification_close)
+
+(define-notify notification-get-closed-reason
+  (_fun _NotifyNotification -> _int)
+  #:c-id notify_notification_get_closed_reason)
 
 (define-notify notify-init
-               (_fun _string -> _bool)
-               #:c-id notify_init)
+  (_fun _string -> _bool)
+  #:c-id notify_init)
 
 (define-notify notify-uninit
-               (_fun -> _void)
-               #:c-id notify_uninit)
+  (_fun -> _void)
+  #:c-id notify_uninit)
+
+(define-notify notify-is-initted
+  (_fun -> _bool)
+  #:c-id notify_is_initted)
 
 (define-notify notify-get-app-name
-               (_fun -> _string)
-               #:c-id notify_get_app_name)
+  (_fun -> _string)
+  #:c-id notify_get_app_name)
 
 (define-notify notify-set-app-name
-               (_fun _string -> _void)
-               #:c-id notify_set_app_name)
+  (_fun _string -> _void)
+  #:c-id notify_set_app_name)
+
+(define-notify notify-get-sever-cap
+  (_fun ->  _GList-pointer/null)
+  #:c-id notify_get_app_name)
+
+(define-notify notify-get-sever-info
+  (_fun _string _string _string _string -> _bool)
+  #:c-id notify_get_server_info)
