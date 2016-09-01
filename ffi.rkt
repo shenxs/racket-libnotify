@@ -15,7 +15,7 @@
          notification-clear-hints
          notification-close
          notify-init
-         notify-is-initted
+         notify-is-initted?
          notify-uninit
          notify-get-app-name
          notify-set-app-name
@@ -108,7 +108,7 @@
   (_fun -> _void)
   #:c-id notify_uninit)
 
-(define-notify notify-is-initted
+(define-notify notify-is-initted?
   (_fun -> _bool)
   #:c-id notify_is_initted)
 

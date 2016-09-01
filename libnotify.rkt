@@ -22,6 +22,7 @@
 
 (struct exn:fail:libnotify exn:fail ())
 
+;;为什么一定要#f
 (define initialized? #f)
 
 (define (raise-libnotify-error msg)
